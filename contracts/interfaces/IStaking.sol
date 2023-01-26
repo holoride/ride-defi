@@ -9,4 +9,5 @@ interface IStaking {
     function unstake() external;
     function unstakeForced() external;
     function addRewards(uint _amount) external;
+    function computeRewards(address _stakers) external returns (uint);
 }
