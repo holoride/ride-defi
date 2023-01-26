@@ -2,6 +2,7 @@ require("dotenv").config();
 
 require("@nomicfoundation/hardhat-toolbox");
 require("@nomiclabs/hardhat-etherscan");
+require("@nomiclabs/hardhat-web3");
 require('hardhat-abi-exporter');
 
 module.exports = {

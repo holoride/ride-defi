@@ -23,8 +23,8 @@ contract Staking is AccessControl, IStaking {
   IERC20 public rewardToken;
   uint public availableRewards;
   mapping (address => uint) public tail;
-  // mapping (address => uint) public head;
-  mapping (address => StakePosition[]) public stakeQueue;
+  mapping (address => uint) public head;
+  mapping (address => mapping(uint => StakePosition) ) public stakeQueue;
 
   /**
    * @notice Constructor
@@ -67,8 +67,12 @@ contract Staking is AccessControl, IStaking {
     tokenToStake.transferFrom(msg.sender, address(this), _amount);
 
     // Create staking position
+    uint positionIndex = head[msg.sender];
     StakePosition memory position = StakePosition(_amount, block.timestamp);
-    stakeQueue[msg.sender].push(position);
+    stakeQueue[msg.sender][positionIndex] = position;
+
+    // Update head
+    head[msg.sender] += 1;
 
     // emit event
     emit Stake(msg.sender, _amount, block.timestamp);
@@ -131,7 +135,7 @@ contract Staking is AccessControl, IStaking {
     address _staker,
     bool _forced
   ) internal view returns (uint, uint, uint) {
-    uint positions = stakeQueue[_staker].length;
+    uint positions = head[_staker];
     uint totalRewards = 0;
     uint totalStakedTokens = 0;
 
@@ -175,10 +179,17 @@ contract Staking is AccessControl, IStaking {
     (uint totalRewards, uint totalStakedTokens, uint tailPosition) = _rewards(_staker, _forceUnstake);
 
     // Transfer rewards
-    rewardToken.transfer(_staker, totalRewards);
+    if (totalRewards > 0) {
+      rewardToken.transfer(_staker, totalRewards);
+    }
 
     // Transfer staked tokens
-    tokenToStake.transfer(_staker, totalStakedTokens);
+    if (totalStakedTokens > 0) {
+      tokenToStake.transfer(_staker, totalStakedTokens);
+    }
+
+    // Update available rewards
+    availableRewards -= totalRewards;
 
     // Update tail
     tail[msg.sender] = tailPosition;
