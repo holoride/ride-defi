@@ -68,11 +68,13 @@ contract Staking is AccessControl, IStaking {
 
     // Create staking position
     uint positionIndex = head[msg.sender];
-    StakePosition memory position = StakePosition(_amount, block.timestamp);
-    stakeQueue[msg.sender][positionIndex] = position;
+
+    StakePosition storage position = stakeQueue[msg.sender][positionIndex];
+    position.amount = _amount;
+    position.timestamp = block.timestamp;
 
     // Update head
-    head[msg.sender] += 1;
+    head[msg.sender] = positionIndex + 1;
 
     // emit event
     emit Stake(msg.sender, _amount, block.timestamp);
@@ -135,17 +137,13 @@ contract Staking is AccessControl, IStaking {
     address _staker,
     bool _forced
   ) internal view returns (uint, uint, uint) {
-    uint positions = head[_staker];
     uint totalRewards = 0;
     uint totalStakedTokens = 0;
 
     // Compute total rewards 
-    uint tailPosition = tail[msg.sender];
-    for (; tailPosition < positions; tailPosition++) {
-      StakePosition memory position = stakeQueue[msg.sender][tailPosition];  
-
-      // Update staked tokens to transfer
-      totalStakedTokens += position.amount;
+    uint tailPosition = tail[_staker];
+    for (; tailPosition < head[_staker]; tailPosition++) {
+      StakePosition memory position = stakeQueue[_staker][tailPosition];  
 
       // Compute time difference and check if stake is eligible 
       uint timeDiff = block.timestamp - position.timestamp;
@@ -155,6 +153,9 @@ contract Staking is AccessControl, IStaking {
       } else if (! _forced) {
         break;
       }
+
+      // Update staked tokens to transfer
+      totalStakedTokens += position.amount;
     }
 
     // Sanity check. Do not transfer more than what's in the contract

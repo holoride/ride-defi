@@ -2,8 +2,8 @@
 pragma solidity ^0.8.17;
 
 interface IStaking {
-    event Stake(address indexed _staker, uint _amount, uint _timestamp);
-    event Unstake(address indexed _staker, uint amount, uint _timestamp);
+    event Stake(address indexed _staker, uint indexed _amount, uint indexed _timestamp);
+    event Unstake(address indexed _staker, uint indexed amount, uint indexed _timestamp);
 
     function stake(uint _amount) external;
     function unstake() external;
