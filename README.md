@@ -51,5 +51,11 @@ File                   |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Li
   GenericERC20.sol     |      100 |      100 |      100 |      100 |                |
 All files              |      100 |      100 |      100 |      100 |                |
 
+## Documentation
+You can find the updated documentation the [docs folder](./docs/Staking.md). In order to generate it you have to run
+```
+$ npx hardhat docgen
+```
+
 ## Other blockchains
 You can easily add support for other EVM blockchains by adding a new network filed in the hardhat configuration file hardhat.config.js. The source code should not be changed.

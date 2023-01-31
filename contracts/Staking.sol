@@ -153,7 +153,7 @@ contract Staking is AccessControl, Pausable, IStaking {
   }
 
   /**
-   * @notice Compute staking rewards for an address
+   * @notice Compute rewards for a single stake
    * @param _staker Address of which you want to compute rewards
    * @param _index Index of the stake position
    */

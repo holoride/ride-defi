@@ -4,6 +4,7 @@ require("@nomicfoundation/hardhat-toolbox");
 require("@nomiclabs/hardhat-etherscan");
 require("@nomiclabs/hardhat-web3");
 require('hardhat-abi-exporter');
+require('solidity-docgen');
 
 module.exports = {
   solidity: {
@@ -36,5 +37,14 @@ module.exports = {
     runOnCompile: true,
     clear: true,
     spacing: 2,
+  },
+
+  docgen: {
+    outputDir: "./docs",
+    pages: "files",
+    exclude: [
+      "interfaces/IStaking.sol",
+      "mocks/GenericERC20.sol"
+    ]
   }
 };
