@@ -34,5 +34,17 @@ In order to run tests you just have to run
 $ npx hardhat test
 ```
 
+## Coverage
+Updated code coverage
+File                   |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+-----------------------|----------|----------|----------|----------|----------------|
+ contracts/            |      100 |      100 |      100 |      100 |                |
+  Staking.sol          |      100 |      100 |      100 |      100 |                |
+ contracts/interfaces/ |      100 |      100 |      100 |      100 |                |
+  IStaking.sol         |      100 |      100 |      100 |      100 |                |
+ contracts/mocks/      |      100 |      100 |      100 |      100 |                |
+  GenericERC20.sol     |      100 |      100 |      100 |      100 |                |
+All files              |      100 |      100 |      100 |      100 |                |
+
 ## Other blockchains
 You can easily add support for other EVM blockchains by adding a new network filed in the hardhat configuration file hardhat.config.js. The source code should not be changed.
