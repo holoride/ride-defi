@@ -2,26 +2,29 @@
 pragma solidity ^0.8.17;
 
 // Imports
+import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./interfaces/IStaking.sol";
 
-contract Staking is AccessControl, IStaking {
+contract Staking is AccessControl, Pausable, IStaking {
   // Structures
   struct StakePosition {
     uint amount; // amount of tokens staked
     uint timestamp; // block timestamp of the stake operation
+    uint rewardsPercentage; // rewards for this position
+    bool singleClaimed; // true if user unstakes ONLY this exact position 
   }
 
   // Constants
   uint public constant REWARDS_DIVIDER = 10000;
-  uint public immutable REWARDS_PERCENTAGE;
   uint public immutable STAKING_TERM;
 
   // Members
+  uint public rewardsPercentage;
+  uint public availableRewards;
   IERC20 public tokenToStake;
   IERC20 public rewardToken;
-  uint public availableRewards;
   mapping (address => uint) public tail;
   mapping (address => uint) public head;
   mapping (address => mapping(uint => StakePosition) ) public stakeQueue;
@@ -47,7 +50,7 @@ contract Staking is AccessControl, IStaking {
     tokenToStake = IERC20(_tokenToStake);
     rewardToken = IERC20(_rewardToken);
 
-    REWARDS_PERCENTAGE = _rewardsPercentage;
+    rewardsPercentage = _rewardsPercentage;
     STAKING_TERM = _stakingTerm;
   }
 
@@ -62,7 +65,9 @@ contract Staking is AccessControl, IStaking {
    */
   function stake(
     uint _amount
-  ) external override {
+  ) external override  whenNotPaused {
+    require (_amount > 0, "Invalid amount");
+
     // Get tokens
     tokenToStake.transferFrom(msg.sender, address(this), _amount);
 
@@ -72,6 +77,8 @@ contract Staking is AccessControl, IStaking {
     StakePosition storage position = stakeQueue[msg.sender][positionIndex];
     position.amount = _amount;
     position.timestamp = block.timestamp;
+    position.rewardsPercentage = rewardsPercentage;
+    position.singleClaimed = false;
 
     // Update head
     head[msg.sender] = positionIndex + 1;
@@ -95,10 +102,51 @@ contract Staking is AccessControl, IStaking {
   }
 
   /**
+   * @notice Unstake single position in the queue
+   * @param _index Index of the position in the queue
+   */
+  function unstakeSingle(
+    uint _index
+  ) external override {
+    // Check that index is valid
+    require (_index < head[msg.sender] && _index >= tail[msg.sender], "Invalid index");
+    
+    // Check position hasn't been already claimed
+    StakePosition storage position = stakeQueue[msg.sender][_index];
+    require (! position.singleClaimed, "Already claimed");
+
+    // Check if eligible for rewards and eventually compute them
+    uint timeDiff = block.timestamp - position.timestamp;
+    uint totalRewards = 0;
+    if (timeDiff >= STAKING_TERM) {
+      totalRewards = position.amount * position.rewardsPercentage / REWARDS_DIVIDER;
+
+      // Update available rewards
+      availableRewards -= totalRewards;
+    }
+
+    // Transfer staked tokens
+    tokenToStake.transfer(msg.sender, position.amount);
+
+    // Transfer rewards
+    if (totalRewards > 0) {
+      rewardToken.transfer(msg.sender, totalRewards);
+    }
+
+    // Update position as claimed
+    position.singleClaimed = true;
+
+    // Emit unstale event
+    emit Unstake(msg.sender, position.amount, totalRewards, block.timestamp);
+  }
+
+  /**
    * @notice Compute staking rewards for an address
    * @param _staker Address of which you want to compute rewards
    */
-  function computeRewards(address _staker) external view override returns (uint) {
+  function computeRewards(
+    address _staker
+  ) external view override returns (uint) {
     (uint rewards , , ) = _rewards(_staker, false);
 
     return rewards;
@@ -120,6 +168,32 @@ contract Staking is AccessControl, IStaking {
 
     // Update counter
     availableRewards += _amount;
+  }
+
+  /**
+   * @notice Update rewards percentage for new positions
+   * @param _percentage New reward percentage
+   */
+  function updateRewardsPercentage(
+    uint _percentage
+  ) external onlyRole(DEFAULT_ADMIN_ROLE) {
+    rewardsPercentage = _percentage;
+
+    emit UpdatedRewardsPercentage(_percentage);
+  }
+
+  /**
+   * @notice Pause staking functionality
+   */
+  function pause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    _pause();
+  }
+
+  /**
+   * @notice Pause staking functionality
+   */
+  function unpause() external onlyRole(DEFAULT_ADMIN_ROLE) {
+    _unpause();
   }
 
   /////////////////////////////////////////////////////////////////////////////
@@ -145,11 +219,16 @@ contract Staking is AccessControl, IStaking {
     for (; tailPosition < head[_staker]; tailPosition++) {
       StakePosition memory position = stakeQueue[_staker][tailPosition];  
 
+      // Check if position has already been exclusively claimed
+      if (position.singleClaimed) {
+        continue;
+      }
+
       // Compute time difference and check if stake is eligible 
       uint timeDiff = block.timestamp - position.timestamp;
       if (timeDiff >= STAKING_TERM) {
         // Since it's eligible, add rewards
-        totalRewards += position.amount * REWARDS_PERCENTAGE / REWARDS_DIVIDER;
+        totalRewards += position.amount * position.rewardsPercentage / REWARDS_DIVIDER;
       } else if (! _forced) {
         break;
       }
@@ -196,6 +275,6 @@ contract Staking is AccessControl, IStaking {
     tail[msg.sender] = tailPosition;
 
     // Emit event
-    emit Unstake(_staker, totalRewards, block.timestamp);
+    emit Unstake(_staker, totalStakedTokens, totalRewards, block.timestamp);
   }
 }
