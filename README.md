@@ -35,7 +35,12 @@ $ npx hardhat test
 ```
 
 ## Coverage
-Updated code coverage
+In order to generate the coverage report you have to run
+```
+$ npx hardhat coverage
+```
+
+This is the current status
 File                   |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
 -----------------------|----------|----------|----------|----------|----------------|
  contracts/            |      100 |      100 |      100 |      100 |                |
