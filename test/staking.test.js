@@ -329,10 +329,12 @@ describe("Staking", function () {
     })
 
     it("Staker1 should not be able to do a signle unstake of an old position", async () => {
+      await expectRevert(staking.computeRewardsSingle(staker1.address, 2), "Invalid index");
       await expectRevert(staking.connect(staker1).unstakeSingle(2), "Invalid index");
     })
 
     it("Staker1 should not be able to do a signle unstake of an old position", async () => {
+      await expectRevert(staking.computeRewardsSingle(staker1.address, 3), "Invalid index");
       await expectRevert(staking.connect(staker1).unstakeSingle(3), "Invalid index");
     })
 
@@ -416,6 +418,12 @@ describe("Staking", function () {
       expect(updatedTimestamp - lastBlockTimestamp).to.be.equal(fiveMonths)
     })
 
+    it("Should compute rewards single unstake", async () => {
+      const rewards = await staking.computeRewardsSingle(staker2.address, 1);
+
+      expect(rewards).to.be.equal(staker2StakeAmounts[1].div("20"))
+    })
+
     it("Staker2 should do a single unstake for second stake", async () => {
       const stakingTokenBefore = await stakingToken.balanceOf(staker2.address);
       const rewardTokenBefore = await rewardToken.balanceOf(staker2.address);
@@ -440,11 +448,19 @@ describe("Staking", function () {
     })
 
     it("Staker2 should not be able to do a single unstake twice", async () => {
+      await expectRevert(staking.computeRewardsSingle(staker2.address, 1), "Already claimed");
       await expectRevert(staking.connect(staker2).unstakeSingle(1), "Already claimed");
     })
 
     it("Staker1 should not be able to do a single unstake out of the queue", async () => {
+      await expectRevert(staking.computeRewardsSingle(staker2.address, 5), "Invalid index");
       await expectRevert(staking.connect(staker2).unstakeSingle(5), "Invalid index");
+    })
+
+    it("Should compute rewards single unstake", async () => {
+      const rewards = await staking.computeRewardsSingle(staker2.address, 2);
+
+      expect(rewards).to.be.equal(0)
     })
 
     it("Staker2 should do a single unstake for third stake", async () => {

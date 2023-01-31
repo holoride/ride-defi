@@ -12,4 +12,5 @@ interface IStaking {
     function unstakeSingle(uint _index) external;
     function addRewards(uint _amount) external;
     function computeRewards(address _stakers) external returns (uint);
+    function computeRewardsSingle(address _staker, uint _index) external returns (uint);
 }

@@ -152,6 +152,32 @@ contract Staking is AccessControl, Pausable, IStaking {
     return rewards;
   }
 
+  /**
+   * @notice Compute staking rewards for an address
+   * @param _staker Address of which you want to compute rewards
+   * @param _index Index of the stake position
+   */
+  function computeRewardsSingle(
+    address _staker,
+    uint _index
+  ) external view override returns (uint) {
+    // Check that index is valid
+    require (_index < head[_staker] && _index >= tail[_staker], "Invalid index");
+    
+    // Check position hasn't been already claimed
+    StakePosition storage position = stakeQueue[_staker][_index];
+    require (! position.singleClaimed, "Already claimed");
+
+    // Check if eligible for rewards and eventually compute them
+    uint timeDiff = block.timestamp - position.timestamp;
+    uint totalRewards = 0;
+    if (timeDiff >= STAKING_TERM) {
+      totalRewards = position.amount * position.rewardsPercentage / REWARDS_DIVIDER;
+    }
+
+    return totalRewards;
+  }
+
   /////////////////////////////////////////////////////////////////////////////
   // PRIVILEGED FUNCTIONS
   /**
