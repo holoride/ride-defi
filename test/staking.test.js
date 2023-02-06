@@ -120,6 +120,14 @@ describe("Staking", function () {
       expect(position.timestamp).to.be.equal(lastBlockTimestamp)
     })
 
+    it("Total staked tokens should be updated", async () => {
+      const staked = await staking.totalStakedByUser(staker1.address);
+      const total = await staking.totalStakedTokens();
+
+      expect(staked).to.be.equal(staker1StakeAmounts[0])
+      expect(total).to.be.equal(staker1StakeAmounts[0])
+    })
+
     it("Head and tail are correct", async () => {
       const head = await staking.head(staker1.address);
       const tail = await staking.tail(staker1.address);
@@ -196,6 +204,12 @@ describe("Staking", function () {
       expect(position.timestamp).to.be.equal(lastBlockTimestamp)
     })
 
+    it("Total staked tokens should be updated", async () => {
+      const total = await staking.totalStakedTokens();
+
+      expect(total).to.be.equal(staker1StakeAmounts[0].add(staker1StakeAmounts[1]))
+    })
+
     it("Head and tail are correct", async () => {
       const head = await staking.head(staker1.address);
       const tail = await staking.tail(staker1.address);
@@ -237,6 +251,12 @@ describe("Staking", function () {
       expect(position.timestamp).to.be.equal(lastBlockTimestamp);
     })
 
+    it("Total staked tokens should be updated", async () => {
+      const total = await staking.totalStakedTokens();
+
+      expect(total).to.be.equal(staker1StakeAmounts[0].add(staker1StakeAmounts[1]).add(staker1StakeAmounts[2]))
+    })
+
     it("Head and tail are correct", async () => {
       const head = await staking.head(staker1.address);
       const tail = await staking.tail(staker1.address);
@@ -259,19 +279,31 @@ describe("Staking", function () {
     it("Staker1 should unstake and receive rewards for the first position", async () => {
       const stakingTokenBalanceBefore = await stakingToken.balanceOf(staker1.address);
       const rewardTokenBalanceBefore = 0; // await rewardToken.balanceOf(staker1.address);
+      const totalStakedBefore = await staking.totalStakedByUser(staker1.address);
 
       await staking.connect(staker1).unstake();
 
       const stakingTokenBalanceAfter = await stakingToken.balanceOf(staker1.address);
       const rewardTokenBalanceAfter = await rewardToken.balanceOf(staker1.address);
+      const totalStakedAfter = await staking.totalStakedByUser(staker1.address);
       
       const stakingTokenDiff = stakingTokenBalanceAfter.sub(stakingTokenBalanceBefore);
       const rewardTokenDiff = rewardTokenBalanceAfter.sub(rewardTokenBalanceBefore);
+      const totalStakedDiff = totalStakedBefore.sub(totalStakedAfter)
 
       const expectedRewards = staker1StakeAmounts[0].div("10")
 
+      console.log("Unstake amount:", ethers.utils.formatEther(totalStakedDiff))
+
       expect(stakingTokenDiff).to.be.equal(staker1StakeAmounts[0]);
       expect(rewardTokenDiff).to.be.equal(expectedRewards)
+      expect(totalStakedDiff).to.be.equal(stakingTokenDiff)
+    })
+
+    it("Total staked tokens should be updated", async () => {
+      const total = await staking.totalStakedTokens();
+
+      expect(total).to.be.equal(staker1StakeAmounts[1].add(staker1StakeAmounts[2]))
     })
 
     it("Rewards for staker1 should be 0", async () => {
