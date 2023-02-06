@@ -35,6 +35,7 @@ async function main() {
   // Verify on explorer
   if (network.name !== "hardhat" && network.name !== "localhost") {
     // await 10 seconds
+    console.log("Wait 10 seconds before verification...")
     await new Promise(resolve => setTimeout(resolve, 10000));
 
     // Verify Staking

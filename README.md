@@ -27,6 +27,12 @@ Once done, you can just run
 $ npx hardhat run scripts/deploy.js --network <network name>
 ```
 If you are deploying on Goerli, it will automatically deploy two ERC20 tokens called RewardToken and StakingToken. The wallet that runs the deploy will also receive one million of both for testing.
+Latest deploeyed smart contracts can be found here:
+```
+Staking Smart Contract: 0x75069c2F12e25C6b09A3D2eAB6EfbaA27855080B
+Staking Token: 0x55E8E1B03B3ce4bCc69C4B1caa46d8e33D5748eA
+Reward Token: 0xAc6C80eb22070eAEeF9832e79Cc1dd23B2197E0A
+```
 
 ## Test
 In order to run tests you just have to run
