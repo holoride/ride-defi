@@ -1,7 +1,7 @@
 const { ethers, network, run } = require("hardhat");
 
 async function main() {
-  // TODO: Update parameters bedore deploy
+  // TODO: Update parameters before deploy
   const rewardsPercentage = 1000; // 10'000 means 100% so 1'000 is 10%
   const stakingTerm = 60 * 60 * 24 * 365; // One year expressed in seconds
   let tokenToStakeAddress = "0x..."; // Address of the token to stake 

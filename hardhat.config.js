@@ -44,6 +44,7 @@ module.exports = {
     pages: "files",
     exclude: [
       "interfaces/IStaking.sol",
+      "interfaces/IFarming.sol",
       "mocks/GenericERC20.sol"
     ]
   }

@@ -1,10 +1,10 @@
-# Ride Staking
-RIDE staking smart contracts for EVM blockchain (currently developed for Ethereum).
+# Ride DeFi
+RIDE staking and farming smart contracts for EVM blockchain (currently developed for Ethereum).
 
 ## Dependencies
 First step is to download this repository:
 ```
-$ git clone https://github.com/holoride/ride-staking.git
+$ git clone https://github.com/holoride/ride-defi.git
 ```
 Then you have to install all the Node dependencies
 ```
@@ -20,11 +20,11 @@ ETHERSCAN_API_KEY=
 ```
 You will also find a .env.template file that you can rename and use instead of creating a new one from scratch.
 
-## Deploy
-In order to deploy the smart contract you have to update the staking parameters in the script scripts/deploy.js. 
+## Deploy Staking
+In order to deploy the staking smart contract you have to update the staking parameters in the script scripts/deployStaking.js. 
 Once done, you can just run
 ```
-$ npx hardhat run scripts/deploy.js --network <network name>
+$ npx hardhat run scripts/deployStaking.js --network <network name>
 ```
 If you are deploying on Goerli, it will automatically deploy two ERC20 tokens called RewardToken and StakingToken. The wallet that runs the deploy will also receive one million of both for testing.
 Latest deploeyed smart contracts can be found here:
@@ -32,6 +32,20 @@ Latest deploeyed smart contracts can be found here:
 Staking Smart Contract: 0x75069c2F12e25C6b09A3D2eAB6EfbaA27855080B
 Staking Token: 0x55E8E1B03B3ce4bCc69C4B1caa46d8e33D5748eA
 Reward Token: 0xAc6C80eb22070eAEeF9832e79Cc1dd23B2197E0A
+```
+
+## Deploy Farming
+In order to deploy the farming smart contract you have to update the farming parameters in the script scripts/deployFarming.js. 
+Once done, you can just run
+```
+$ npx hardhat run scripts/deployFarming.js --network <network name>
+```
+If you are deploying on Goerli, it will automatically deploy two ERC20 tokens called RewardToken and LPToken. The wallet that runs the deploy will also receive one million of both for testing.
+Latest deploeyed smart contracts can be found here:
+```
+Farming Smart Contract: 0x085Ae02A818d94f5f36236b6929BEB9E7f289ac5
+LP Token: 0x731AA50791CFe7D86b1A6c537BF216807305C954
+Reward Token: 0x4193d112f60fDC4f17b56a8d82Db127330980200
 ```
 
 ## Test
@@ -49,16 +63,18 @@ $ npx hardhat coverage
 This is the current status
 File                   |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
 -----------------------|----------|----------|----------|----------|----------------|
- contracts/            |      100 |      100 |      100 |      100 |                |
+ contracts/            |    98.11 |    94.29 |      100 |       98 |                |
+  Farming.sol          |    96.55 |     87.5 |      100 |     96.1 |    113,221,222 |
   Staking.sol          |      100 |      100 |      100 |      100 |                |
  contracts/interfaces/ |      100 |      100 |      100 |      100 |                |
+  IFarming.sol         |      100 |      100 |      100 |      100 |                |
   IStaking.sol         |      100 |      100 |      100 |      100 |                |
  contracts/mocks/      |      100 |      100 |      100 |      100 |                |
   GenericERC20.sol     |      100 |      100 |      100 |      100 |                |
-All files              |      100 |      100 |      100 |      100 |                |
+All files              |    98.13 |    94.29 |      100 |    98.01 |                |
 
 ## Documentation
-You can find the updated documentation the [docs folder](./docs/Staking.md). In order to generate it you have to run
+You can find the updated documentation the [docs folder](./docs/). In order to generate it you have to run
 ```
 $ npx hardhat docgen
 ```
