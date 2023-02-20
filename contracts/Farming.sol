@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IFarming.sol";
 
-contract Farm is Ownable, IFarming {
+contract Farming is Ownable, IFarming {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
 
@@ -179,7 +179,6 @@ contract Farm is Ownable, IFarming {
     return user.amount.mul(accERC20PerShare).div(1e36).sub(user.rewardDebt);
   }
 
-  // View function for total reward the farm has yet to pay out.
   /**
     * @notice Returns the total amount of pending rewards
     * @return totalRewards Total amount of pending rewards
@@ -239,6 +238,8 @@ contract Farm is Ownable, IFarming {
     uint256 _pid, 
     uint256 _amount
   ) public {
+    require(block.number <= endBlock, "deposit: cannot deposit after end block");
+
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][msg.sender];
     updatePool(_pid);
