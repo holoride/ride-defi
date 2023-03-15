@@ -159,6 +159,21 @@ contract Staking is AccessControl, Pausable, IStaking {
   }
 
   /**
+   * @notice Compute staking rewards for an address
+   * @param _staker Address of which you want to compute rewards
+   * @param _unstakeAll If true, simulates unstaking all position. If not,
+              simulates unstaking only position available for rewards.
+   */
+  function previewUnstake(
+    address _staker,
+    bool _unstakeAll
+  ) external view override returns (uint, uint) {
+    (uint rewards , uint totalStaked , ) = _rewards(_staker, _unstakeAll);
+
+    return (rewards, totalStaked);
+  }
+
+  /**
    * @notice Compute rewards for a single stake
    * @param _staker Address of which you want to compute rewards
    * @param _index Index of the stake position

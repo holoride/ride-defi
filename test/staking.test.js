@@ -144,6 +144,24 @@ describe("Staking", function () {
       expect(stakingBalance).to.be.equal(staker1StakeAmounts[0]);
     })
 
+    it("preview works correctly", async () => {
+      // Test only eligible
+      let preview = await staking.previewUnstake(staker1.address, false);
+      let rewards = preview[0];
+      let staked = preview[1]
+
+      expect(rewards).to.be.equal(0);
+      expect(staked).to.be.equal(0)
+
+      // Test unstake all
+      preview = await staking.previewUnstake(staker1.address, true);
+      rewards = preview[0];
+      staked = preview[1]
+
+      expect(rewards).to.be.equal(0);
+      expect(staked).to.be.equal(staker1StakeAmounts[0])
+    })
+
     it("1 month passes", async () => {
       const lastBlockTimestamp = await helpers.time.latest();
       const oneMonth = 60 * 60 * 24 * 30
@@ -281,6 +299,10 @@ describe("Staking", function () {
       const rewardTokenBalanceBefore = 0; // await rewardToken.balanceOf(staker1.address);
       const totalStakedBefore = await staking.totalStakedByUser(staker1.address);
 
+      let preview = await staking.previewUnstake(staker1.address, false);
+      let rewards = preview[0];
+      let staked = preview[1]
+
       await staking.connect(staker1).unstake();
 
       const stakingTokenBalanceAfter = await stakingToken.balanceOf(staker1.address);
@@ -298,6 +320,9 @@ describe("Staking", function () {
       expect(stakingTokenDiff).to.be.equal(staker1StakeAmounts[0]);
       expect(rewardTokenDiff).to.be.equal(expectedRewards)
       expect(totalStakedDiff).to.be.equal(stakingTokenDiff)
+
+      expect(rewards).to.be.equal(expectedRewards);
+      expect(staked).to.be.equal(stakingTokenDiff)
     })
 
     it("Total staked tokens should be updated", async () => {
@@ -336,6 +361,10 @@ describe("Staking", function () {
       const stakingTokenBefore = await stakingToken.balanceOf(staker1.address);
       const rewardTokenBefore = await rewardToken.balanceOf(staker1.address);
 
+      let preview = await staking.previewUnstake(staker1.address, true);
+      let rewards = preview[0];
+      let staked = preview[1]
+
       await staking.connect(staker1).unstakeForced();
 
       const stakingTokenAfter = await stakingToken.balanceOf(staker1.address);
@@ -349,6 +378,9 @@ describe("Staking", function () {
 
       expect(stakingTokenDiff).to.be.equal(expectedStakingTokens);
       expect(rewardTokenDiff).to.be.equal(expectedRewardTokens);
+
+      expect(rewards).to.be.equal(expectedRewardTokens);
+      expect(staked).to.be.equal(stakingTokenDiff)
     })
 
 
