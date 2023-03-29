@@ -43,9 +43,9 @@ $ npx hardhat run scripts/deployFarming.js --network <network name>
 If you are deploying on Goerli, it will automatically deploy two ERC20 tokens called RewardToken and LPToken. The wallet that runs the deploy will also receive one million of both for testing.
 Latest deploeyed smart contracts can be found here:
 ```
-Farming Smart Contract: 0x085Ae02A818d94f5f36236b6929BEB9E7f289ac5
-LP Token: 0x731AA50791CFe7D86b1A6c537BF216807305C954
-Reward Token: 0x4193d112f60fDC4f17b56a8d82Db127330980200
+Farming Smart Contract: 0x81b628bEBfcab17e9A15ad1548d58283E8B8B4b0
+LP Token: 0xf36dC610A2CF10cac0C6A35C2d21C72539D18Ffd
+Reward Token: 0x92cCB84A3D958335EFd602f0CDAF647d5429c6b9
 ```
 
 ## Test

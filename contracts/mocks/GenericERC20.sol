@@ -16,7 +16,7 @@ contract GenericERC20 is ERC20 {
     string memory _symbol
   ) ERC20(_name, _symbol) {
     // Mint one million tokens
-    _mint(msg.sender, 1_000_000 * 10**18);
+    _mint(msg.sender, 1_000_000_000 * 10**18);
   }
 
 }
