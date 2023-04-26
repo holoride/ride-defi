@@ -29,9 +29,11 @@ $ npx hardhat run scripts/deployStaking.js --network <network name>
 If you are deploying on Goerli, it will automatically deploy two ERC20 tokens called RewardToken and StakingToken. The wallet that runs the deploy will also receive one million of both for testing.
 Latest deploeyed smart contracts can be found here:
 ```
-Staking Smart Contract: 0x67e946fc4Ab6c06857eab8daFACb7bEC4Fdf527a
-Staking Token: 0x10c6bAbA37A37e0f2240d826423D8B54100c0507
-Reward Token: 0x6b16b4cb8C2C49fa030deea5B4A6bf1a62E0DAB4
+Staking Smart Contract (short term): 0xE440b4C6eEc9961F13B9904a8a647a62441a16aF
+Staking Smart Contract (mid term): 0x846fE993Fa8F0ddfde34f43d372ceD6527BEe076
+Staking Smart Contract (long term): 0x134d71DCbF5802CEa182BeE171c151CB9Eb87ac0
+Staking Token: 0x75021b8FdE01A51D984D27f2a012F7eaA8453778
+Reward Token: 0x0781cEC875cB76f6F76D47172195b69018f8C2Fd
 ```
 
 ## Deploy Farming

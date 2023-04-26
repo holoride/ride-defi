@@ -134,6 +134,9 @@ contract Staking is AccessControl, Pausable, IStaking {
     // Transfer staked tokens
     tokenToStake.transfer(msg.sender, position.amount);
 
+    totalStakedByUser[msg.sender] -= position.amount;
+    totalStakedTokens -= position.amount;
+
     // Transfer rewards
     if (totalRewards > 0) {
       rewardToken.transfer(msg.sender, totalRewards);
