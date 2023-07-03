@@ -301,7 +301,7 @@ contract Farming is Ownable, IFarming {
     address _to, 
     uint256 _amount
   ) internal {
-    erc20.transfer(_to, _amount);
+    SafeERC20.safeTransfer(erc20, _to, _amount);
     paidOut += _amount;
   }
 }
