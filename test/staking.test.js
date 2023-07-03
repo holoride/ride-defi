@@ -631,6 +631,48 @@ describe("Staking", function () {
       expect(rewardTokenDiff).to.be.equal(expectedRewardTokens);
       expect(availableRewardsAfter).to.be.equal(0);
     })
+
+    it("Staker2 should stake again", async () => {
+      await stakingToken.connect(staker2).approve(staking.address, stakeAmount);
+      await staking.connect(staker2).stake(stakeAmount);
+    })
+
+    it("6 month passes", async () => {
+      const lastBlockTimestamp = await helpers.time.latest();
+      const sixMonths = 60 * 60 * 24 * 30 * 6 + 86400
+      const sixMonthsLater = lastBlockTimestamp + sixMonths;
+
+      await network.provider.send("evm_mine", [sixMonthsLater]);
+
+      const updatedTimestamp = await helpers.time.latest();
+      expect(updatedTimestamp - lastBlockTimestamp).to.be.equal(sixMonths)
+    })
+
+    it("Available rewards should be zero", async () => {
+      const available = await staking.availableRewards();
+
+      expect(available).to.be.eq("0")
+    })
+
+    it("Staker2 should unstake the last position and receive no rewards", async () => {
+      const tail = await staking.tail(staker2.address);
+
+      const stakingTokenBefore = await stakingToken.balanceOf(staker2.address);
+      const rewardTokenBefore = await rewardToken.balanceOf(staker2.address);
+
+      await staking.connect(staker2).unstakeSingle(tail);
+
+      const stakingTokenAfter = await stakingToken.balanceOf(staker2.address);
+      const rewardTokenAfter = await rewardToken.balanceOf(staker2.address);
+
+      const stakingTokenDiff = stakingTokenAfter.sub(stakingTokenBefore);
+      const rewardTokenDiff = rewardTokenAfter.sub(rewardTokenBefore);
+
+      const expectedStakingTokens = stakeAmount
+
+      expect(stakingTokenDiff).to.be.equal(expectedStakingTokens);
+      expect(rewardTokenDiff).to.be.equal(0);
+    })
   })
 
   describe("Unstake without positions", async () => {

@@ -127,6 +127,11 @@ contract Staking is AccessControl, Pausable, IStaking {
     if (timeDiff >= STAKING_TERM) {
       totalRewards = position.amount * position.rewardsPercentage / REWARDS_DIVIDER;
 
+      // Sanity check. Do not transfer more than what's in the contract
+      if (totalRewards > availableRewards) {
+        totalRewards = availableRewards;
+      }
+
       // Update available rewards
       availableRewards -= totalRewards;
     }
