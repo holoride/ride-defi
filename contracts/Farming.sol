@@ -90,6 +90,7 @@ contract Farming is Ownable, IFarming {
     uint256 _amount
   ) public {
     require(block.number < endBlock, "fund: too late, the farm is closed");
+    require(_amount % rewardPerBlock == 0, "fund: invalid amount");
 
     erc20.safeTransferFrom(address(msg.sender), address(this), _amount);
     endBlock += _amount.div(rewardPerBlock);

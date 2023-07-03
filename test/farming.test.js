@@ -75,6 +75,11 @@ describe("Farming Tests", async () => {
       await rewardToken.approve(farming.address, initialFundAmount)
     })
 
+    it("Should not fund the farming if amount is not divisible by reward block", async () => {
+      const invalidAmount = ethers.utils.parseEther("501");
+      await expectRevert(farming.fund(invalidAmount), "fund: invalid amount");
+    })
+
     it("Should fund the farming", async () => {
       const balanceBefore = await rewardToken.balanceOf(farming.address)
       await farming.fund(initialFundAmount);
