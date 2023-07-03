@@ -49,6 +49,8 @@ contract Staking is AccessControl, Pausable, IStaking {
     uint _rewardsPercentage, 
     uint _stakingTerm
   ) {
+    require(_stakingTerm <= 365 days, "constructor: invalid term");
+
     // Setup roles
     _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 

@@ -55,6 +55,17 @@ describe("Staking", function () {
       await stakingToken.transfer(staker2.address, initialStakingTokenAmont);
     })
 
+    it("Shoudl not deploy staking with invalid term", async () => {
+      const invalidTerm = 86400 * 365 + 1;
+      const factory = await ethers.getContractFactory("Staking")
+      staking = await expectRevert(factory.deploy(
+        stakingToken.address, 
+        rewardToken.address, 
+        STAKING_REWARDS, 
+        invalidTerm
+      ), "constructor: invalid term");
+    })
+
     it("Should deploy Staking smart contract", async () => {
       const factory = await ethers.getContractFactory("Staking")
       staking = await factory.deploy(
