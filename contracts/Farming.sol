@@ -176,7 +176,7 @@ contract Farming is Ownable, IFarming {
     uint256 lpSupply = pool.lpToken.balanceOf(address(this));
     uint256 lastBlock = block.number < endBlock ? block.number : endBlock;
 
-    if (lastBlock > pool.lastRewardBlock && block.number > pool.lastRewardBlock && lpSupply != 0) {
+    if (lastBlock > pool.lastRewardBlock && lpSupply != 0) {
       uint256 nrOfBlocks = lastBlock.sub(pool.lastRewardBlock);
       uint256 erc20Reward = nrOfBlocks.mul(rewardPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
       accERC20PerShare = accERC20PerShare.add(erc20Reward.mul(1e36).div(lpSupply));
