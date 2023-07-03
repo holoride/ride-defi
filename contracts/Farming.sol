@@ -251,7 +251,9 @@ contract Farming is Ownable, IFarming {
     updatePool(_pid);
     if (user.amount > 0) {
       uint256 pendingAmount = user.amount.mul(pool.accERC20PerShare).div(1e36).sub(user.rewardDebt);
-      erc20Transfer(msg.sender, pendingAmount);
+      if (pendingAmount > 0) {
+        erc20Transfer(msg.sender, pendingAmount);
+      }
     }
     pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
     user.amount = user.amount.add(_amount);
@@ -272,8 +274,12 @@ contract Farming is Ownable, IFarming {
     UserInfo storage user = userInfo[_pid][msg.sender];
     require(user.amount >= _amount, "withdraw: can't withdraw more than deposit");
     updatePool(_pid);
+
     uint256 pendingAmount = user.amount.mul(pool.accERC20PerShare).div(1e36).sub(user.rewardDebt);
-    erc20Transfer(msg.sender, pendingAmount);
+    if (pendingAmount > 0) {
+      erc20Transfer(msg.sender, pendingAmount);
+    }
+    
     user.amount = user.amount.sub(_amount);
     user.rewardDebt = user.amount.mul(pool.accERC20PerShare).div(1e36);
     pool.lpToken.safeTransfer(address(msg.sender), _amount);
