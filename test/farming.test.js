@@ -9,7 +9,7 @@ const { mineBlocks } = require("./utils");
 
 // Constants
 const rewardPerBlock = ethers.utils.parseEther("2");
-const startBlockOffset = 100;
+const startBlockOffset = 216000;
 const initialFundAmount = ethers.utils.parseEther("1000")
 
 const farmer1Amounts = [
@@ -49,10 +49,18 @@ describe("Farming Tests", async () => {
       await lpToken.transfer(farmer2.address, ethers.utils.parseEther("4000"))
     })
 
+    it("Should not deploy farming if startBlock is before 30 days from current block number", async () => {
+      const currentBlock = await ethers.provider.getBlockNumber()
+      startBlock = currentBlock + 1
+ 
+      const factory = await ethers.getContractFactory("Farming")
+      await expectRevert(factory.deploy(rewardToken.address, rewardPerBlock, startBlock), "constructor: invalid start block")
+    })
+
     it("Should deploy farming", async () => {
       // compute starting block
       const currentBlock = await ethers.provider.getBlockNumber()
-      startBlock = currentBlock + startBlockOffset
+      startBlock = currentBlock + startBlockOffset + 1
 
       const factory = await ethers.getContractFactory("Farming")
       farming = await factory.deploy(rewardToken.address, rewardPerBlock, startBlock)
