@@ -111,6 +111,7 @@ contract Farming is Ownable, IFarming {
               _allocPoint / totalAllocPoint of the reward per block
     * @param _lpToken Address of the LP token
     * @param _withUpdate If true, updates other farmimg pools
+    * @dev Owner should withdraw before endBlock in order to not lose rewards
     * @dev DO NOT add the same LP token more than once. Rewards will be messed
                 up if you do.
     */
@@ -130,6 +131,9 @@ contract Farming is Ownable, IFarming {
       lastRewardBlock: lastRewardBlock,
       accERC20PerShare: 0
     }));
+
+    // Deposit 1 wei in order to not lose rewards 
+    deposit(poolInfo.length - 1, 1 wei);
   }
 
   /**

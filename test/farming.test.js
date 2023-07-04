@@ -119,8 +119,13 @@ describe("Farming Tests", async () => {
       await expectRevert(farming.connect(farmer1).add(100, lpToken.address, false), "Ownable: caller is not the owner")
     })
 
-    it("Should create a farming pool", async () => {
-      await farming.add(100, lpToken.address, false)
+    it("Should not be possible to create a pool without depositing 1 wei", async () => {
+      await expectRevert(farming.add(100, lpToken.address, false), "ERC20: insufficient allowance");
+    })
+
+    it("Should create a farming pool and deposit 1 wei", async () => {
+      await lpToken.approve(farming.address, 1);
+      await farming.add(100, lpToken.address, false);
     })
 
     it("Pool should be correct", async () => {
@@ -130,6 +135,12 @@ describe("Farming Tests", async () => {
       expect(pool.allocPoint).to.be.equal(100)
       expect(pool.lastRewardBlock).to.be.equal(startBlock)
       expect(pool.accERC20PerShare).to.be.equal(0)
+    })
+
+    it("Deposit info should be correct", async () => {
+      const info = await farming.userInfo(0, deployer.address);
+
+      expect(info.amount).to.be.equal("1")
     })
 
     it("Pool length should be one", async () => {
@@ -191,14 +202,14 @@ describe("Farming Tests", async () => {
 
     it("Total pending rewards should be 16", async () => {
       const total = await farming.totalPending()
-      const expected = ethers.utils.parseEther("16")
-
+      const expected = ethers.utils.parseEther("16") 
+ 
       expect(total).to.be.equal(expected)
     })
 
     it("Expected rewards should be correct", async () => {
       const rewards = await farming.pending(0, farmer1.address) 
-      const expected = rewardPerBlock.mul(8)
+      const expected = rewardPerBlock.mul(8).sub(1) // sub(1) to compensate for the owner deposit of 1 wei
 
       expect(rewards).to.be.equal(expected)
     })
@@ -212,8 +223,8 @@ describe("Farming Tests", async () => {
       // FARMER 2: 0
       // FARM BLOCK: 10
       const rewards1 = await farming.pending(0, farmer1.address) 
-      const expected1 = rewardPerBlock.mul(10)
-      const rewards2 = await farming.pending(0, farmer2.address);
+      const expected1 = rewardPerBlock.mul(10).sub(1) // sub(1) to compensate for the owner deposit of 1 wei
+      const rewards2 = await farming.pending(0, farmer2.address)
       const expected2 = 0
 
       expect(rewards1).to.be.equal(expected1)
@@ -237,7 +248,7 @@ describe("Farming Tests", async () => {
       const rewards1 = 0 
       const distributed1 = rewardPerBlock.mul(10).add(ethers.utils.parseEther("2.222222222222222222"))
       const rewards2 = await farming.pending(0, farmer2.address);
-      const expected2 =  ethers.utils.parseEther("17.777777777777777777") 
+      const expected2 =  ethers.utils.parseEther("17.777777777777777778") 
 
       console.log("Farmer 1 distributed rewards:", ethers.utils.formatEther(distributed1))
       console.log("Farmer 2 rewards:", ethers.utils.formatEther(rewards2))
@@ -264,7 +275,7 @@ describe("Farming Tests", async () => {
       const rewards1 = await farming.pending(0, farmer1.address)
       const expected1 = ethers.utils.parseEther("320")
       const rewards2 = await farming.pending(0, farmer2.address);
-      const expected2 =  ethers.utils.parseEther("657.777777777777777777") 
+      const expected2 =  ethers.utils.parseEther("657.777777777777777778") 
 
       console.log("Farmer 1 distributed rewards:", ethers.utils.formatEther(expected1))
       console.log("Farmer 2 rewards:", ethers.utils.formatEther(rewards2))
