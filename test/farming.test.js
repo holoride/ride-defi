@@ -57,6 +57,14 @@ describe("Farming Tests", async () => {
       await expectRevert(factory.deploy(rewardToken.address, rewardPerBlock, startBlock), "constructor: invalid start block")
     })
 
+    it("Should not deploy farming if startBlock is after 180 days from current block number", async () => {
+      const currentBlock = await ethers.provider.getBlockNumber()
+      startBlock = currentBlock + 1296000 + 2
+ 
+      const factory = await ethers.getContractFactory("Farming")
+      await expectRevert(factory.deploy(rewardToken.address, rewardPerBlock, startBlock), "constructor: invalid start block")
+    })
+
     it("Should deploy farming", async () => {
       // compute starting block
       const currentBlock = await ethers.provider.getBlockNumber()

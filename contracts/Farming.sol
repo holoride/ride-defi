@@ -37,7 +37,10 @@ contract Farming is Ownable, IFarming {
   }
 
   // Minimum number of blocks that needs to pass, from the deploy, in order to start distributing rewards
-  uint constant MINIMUM_BLOCKS_BEFORE_DISTRIBUTION = 216000; // 30 days divided by 12 seconds (average Ethereum block time)
+  uint constant MINIMUM_BLOCKS_BEFORE_DISTRIBUTION = 216_000; // 30 days divided by 12 seconds (average Ethereum block time)
+
+  // Maximum number of blocks that needs to pass, from the deploy, in order to start distributing rewards
+  uint constant MAXIMUM_BLOCKS_BEFORE_DISTRIBUTION = 1_296_000; // 180 days divided by 12 seconds (average Ethereum block time)
 
   // Address of the ERC20 Token contract.
   IERC20 public erc20;
@@ -69,7 +72,8 @@ contract Farming is Ownable, IFarming {
     uint256 _rewardPerBlock, 
     uint256 _startBlock
   ) {
-    require(_startBlock >= block.number + MINIMUM_BLOCKS_BEFORE_DISTRIBUTION, "constructor: invalid start block");
+    require(_startBlock >= block.number + MINIMUM_BLOCKS_BEFORE_DISTRIBUTION && 
+      _startBlock <= block.number + MAXIMUM_BLOCKS_BEFORE_DISTRIBUTION, "constructor: invalid start block");
 
     erc20 = _erc20;
     rewardPerBlock = _rewardPerBlock;
