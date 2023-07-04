@@ -8,6 +8,11 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./interfaces/IStaking.sol";
 
+/**
+ * @notice Staking smart contract
+ * @dev This smart contract currently DOES NOT support fee-on-transfer or rebasing 
+        tokens so you MUST NOT use them.
+ */
 contract Staking is AccessControl, Pausable, IStaking {
   using SafeERC20 for IERC20;
 
