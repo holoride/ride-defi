@@ -3,11 +3,19 @@ pragma solidity ^0.8.18;
 
 // Imports
 import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./interfaces/IStaking.sol";
 
+/**
+ * @notice Staking smart contract
+ * @dev This smart contract currently DOES NOT support fee-on-transfer or rebasing 
+        tokens so you MUST NOT use them.
+ */
 contract Staking is AccessControl, Pausable, IStaking {
+  using SafeERC20 for IERC20;
+
   // Structures
   struct StakePosition {
     uint amount; // amount of tokens staked
@@ -46,6 +54,8 @@ contract Staking is AccessControl, Pausable, IStaking {
     uint _rewardsPercentage, 
     uint _stakingTerm
   ) {
+    require(_stakingTerm <= 365 days, "constructor: invalid term");
+
     // Setup roles
     _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
 
@@ -71,7 +81,7 @@ contract Staking is AccessControl, Pausable, IStaking {
     require (_amount > 0, "Invalid amount");
 
     // Get tokens
-    tokenToStake.transferFrom(msg.sender, address(this), _amount);
+    SafeERC20.safeTransferFrom(tokenToStake, msg.sender, address(this), _amount);
 
     // Create staking position
     uint positionIndex = head[msg.sender];
@@ -127,12 +137,17 @@ contract Staking is AccessControl, Pausable, IStaking {
     if (timeDiff >= STAKING_TERM) {
       totalRewards = position.amount * position.rewardsPercentage / REWARDS_DIVIDER;
 
+      // Sanity check. Do not transfer more than what's in the contract
+      if (totalRewards > availableRewards) {
+        totalRewards = availableRewards;
+      }
+
       // Update available rewards
       availableRewards -= totalRewards;
     }
 
     // Transfer staked tokens
-    tokenToStake.transfer(msg.sender, position.amount);
+    SafeERC20.safeTransfer(tokenToStake, msg.sender, position.amount);
 
     totalStakedByUser[msg.sender] -= position.amount;
     totalStakedTokens -= position.amount;
@@ -214,7 +229,7 @@ contract Staking is AccessControl, Pausable, IStaking {
     uint _amount
   ) external override onlyRole(DEFAULT_ADMIN_ROLE) {
     // Get tokens 
-    rewardToken.transferFrom(msg.sender, address(this), _amount);
+    SafeERC20.safeTransferFrom(rewardToken, msg.sender, address(this), _amount);
 
     // Update counter
     availableRewards += _amount;
@@ -310,12 +325,12 @@ contract Staking is AccessControl, Pausable, IStaking {
 
     // Transfer rewards
     if (totalRewards > 0) {
-      rewardToken.transfer(_staker, totalRewards);
+      SafeERC20.safeTransfer(rewardToken, _staker, totalRewards);
     }
 
     // Transfer staked tokens
     if (totalStaked > 0) {
-      tokenToStake.transfer(_staker, totalStaked);
+      SafeERC20.safeTransfer(tokenToStake, _staker, totalStaked);
 
       // Update total staked
       totalStakedByUser[_staker] -= totalStaked;

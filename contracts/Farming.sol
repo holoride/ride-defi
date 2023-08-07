@@ -3,12 +3,10 @@ pragma solidity ^0.8.18;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IFarming.sol";
 
 contract Farming is Ownable, IFarming {
-  using SafeMath for uint256;
   using SafeERC20 for IERC20;
 
   // Info of each user.
@@ -36,10 +34,16 @@ contract Farming is Ownable, IFarming {
     uint256 accERC20PerShare;   // Accumulated ERC20s per share, times 1e36.
   }
 
+  // Minimum number of blocks that needs to pass, from the deploy, in order to start distributing rewards
+  uint constant MINIMUM_BLOCKS_BEFORE_DISTRIBUTION = 216_000; // 30 days divided by 12 seconds (average Ethereum block time)
+
+  // Maximum number of blocks that needs to pass, from the deploy, in order to start distributing rewards
+  uint constant MAXIMUM_BLOCKS_BEFORE_DISTRIBUTION = 1_296_000; // 180 days divided by 12 seconds (average Ethereum block time)
+
   // Address of the ERC20 Token contract.
   IERC20 public erc20;
   // The total amount of ERC20 that's paid out as reward.
-  uint256 public paidOut = 0;
+  uint256 public paidOut;
   // ERC20 tokens rewarded per block.
   uint256 public rewardPerBlock;
 
@@ -48,7 +52,7 @@ contract Farming is Ownable, IFarming {
   // Info of each user that stakes LP tokens.
   mapping (uint256 => mapping (address => UserInfo)) public userInfo;
   // Total allocation points. Must be the sum of all allocation points in all pools.
-  uint256 public totalAllocPoint = 0;
+  uint256 public totalAllocPoint;
 
   // The block number when farming starts.
   uint256 public startBlock;
@@ -66,6 +70,9 @@ contract Farming is Ownable, IFarming {
     uint256 _rewardPerBlock, 
     uint256 _startBlock
   ) {
+    require(_startBlock >= block.number + MINIMUM_BLOCKS_BEFORE_DISTRIBUTION && 
+      _startBlock <= block.number + MAXIMUM_BLOCKS_BEFORE_DISTRIBUTION, "constructor: invalid start block");
+
     erc20 = _erc20;
     rewardPerBlock = _rewardPerBlock;
     startBlock = _startBlock;
@@ -90,9 +97,10 @@ contract Farming is Ownable, IFarming {
     uint256 _amount
   ) public {
     require(block.number < endBlock, "fund: too late, the farm is closed");
+    require(_amount % rewardPerBlock == 0, "fund: invalid amount");
 
     erc20.safeTransferFrom(address(msg.sender), address(this), _amount);
-    endBlock += _amount.div(rewardPerBlock);
+    endBlock += _amount / rewardPerBlock;
   }
 
   /**
@@ -101,6 +109,7 @@ contract Farming is Ownable, IFarming {
               _allocPoint / totalAllocPoint of the reward per block
     * @param _lpToken Address of the LP token
     * @param _withUpdate If true, updates other farmimg pools
+    * @dev Owner should withdraw before endBlock in order to not lose rewards
     * @dev DO NOT add the same LP token more than once. Rewards will be messed
                 up if you do.
     */
@@ -113,13 +122,16 @@ contract Farming is Ownable, IFarming {
       massUpdatePools();
     }
     uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
-    totalAllocPoint = totalAllocPoint.add(_allocPoint);
+    totalAllocPoint = totalAllocPoint + _allocPoint;
     poolInfo.push(PoolInfo({
       lpToken: _lpToken,
       allocPoint: _allocPoint,
       lastRewardBlock: lastRewardBlock,
       accERC20PerShare: 0
     }));
+
+    // Deposit 1 wei in order to not lose rewards 
+    deposit(poolInfo.length - 1, 1 wei);
   }
 
   /**
@@ -136,7 +148,7 @@ contract Farming is Ownable, IFarming {
     if (_withUpdate) {
       massUpdatePools();
     }
-    totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(_allocPoint);
+    totalAllocPoint = totalAllocPoint - poolInfo[_pid].allocPoint + _allocPoint;
     poolInfo[_pid].allocPoint = _allocPoint;
   }
 
@@ -170,13 +182,13 @@ contract Farming is Ownable, IFarming {
     uint256 lpSupply = pool.lpToken.balanceOf(address(this));
     uint256 lastBlock = block.number < endBlock ? block.number : endBlock;
 
-    if (lastBlock > pool.lastRewardBlock && block.number > pool.lastRewardBlock && lpSupply != 0) {
-      uint256 nrOfBlocks = lastBlock.sub(pool.lastRewardBlock);
-      uint256 erc20Reward = nrOfBlocks.mul(rewardPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
-      accERC20PerShare = accERC20PerShare.add(erc20Reward.mul(1e36).div(lpSupply));
+    if (lastBlock > pool.lastRewardBlock && lpSupply != 0) {
+      uint256 nrOfBlocks = lastBlock - pool.lastRewardBlock;
+      uint256 erc20Reward = nrOfBlocks * rewardPerBlock * pool.allocPoint / totalAllocPoint;
+      accERC20PerShare = accERC20PerShare + erc20Reward * 1e36 / lpSupply;
     }
 
-    return user.amount.mul(accERC20PerShare).div(1e36).sub(user.rewardDebt);
+    return user.amount * accERC20PerShare / 1e36 - user.rewardDebt;
   }
 
   /**
@@ -189,7 +201,7 @@ contract Farming is Ownable, IFarming {
     }
 
     uint256 lastBlock = block.number < endBlock ? block.number : endBlock;
-    return rewardPerBlock.mul(lastBlock - startBlock).sub(paidOut);
+    return rewardPerBlock * (lastBlock - startBlock) - paidOut;
   }
 
   /**
@@ -222,10 +234,10 @@ contract Farming is Ownable, IFarming {
       return;
     }
 
-    uint256 nrOfBlocks = lastBlock.sub(pool.lastRewardBlock);
-    uint256 erc20Reward = nrOfBlocks.mul(rewardPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
+    uint256 nrOfBlocks = lastBlock - pool.lastRewardBlock;
+    uint256 erc20Reward = nrOfBlocks * rewardPerBlock * pool.allocPoint / totalAllocPoint;
 
-    pool.accERC20PerShare = pool.accERC20PerShare.add(erc20Reward.mul(1e36).div(lpSupply));
+    pool.accERC20PerShare = pool.accERC20PerShare + erc20Reward * 1e36 / lpSupply;
     pool.lastRewardBlock = block.number;
   }
 
@@ -244,12 +256,14 @@ contract Farming is Ownable, IFarming {
     UserInfo storage user = userInfo[_pid][msg.sender];
     updatePool(_pid);
     if (user.amount > 0) {
-      uint256 pendingAmount = user.amount.mul(pool.accERC20PerShare).div(1e36).sub(user.rewardDebt);
-      erc20Transfer(msg.sender, pendingAmount);
+      uint256 pendingAmount = user.amount * pool.accERC20PerShare / 1e36 - user.rewardDebt;
+      if (pendingAmount > 0) {
+        erc20Transfer(msg.sender, pendingAmount);
+      }
     }
     pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
-    user.amount = user.amount.add(_amount);
-    user.rewardDebt = user.amount.mul(pool.accERC20PerShare).div(1e36);
+    user.amount = user.amount + _amount;
+    user.rewardDebt = user.amount * pool.accERC20PerShare / 1e36;
     emit Deposit(msg.sender, _pid, _amount);
   }
 
@@ -266,10 +280,14 @@ contract Farming is Ownable, IFarming {
     UserInfo storage user = userInfo[_pid][msg.sender];
     require(user.amount >= _amount, "withdraw: can't withdraw more than deposit");
     updatePool(_pid);
-    uint256 pendingAmount = user.amount.mul(pool.accERC20PerShare).div(1e36).sub(user.rewardDebt);
-    erc20Transfer(msg.sender, pendingAmount);
-    user.amount = user.amount.sub(_amount);
-    user.rewardDebt = user.amount.mul(pool.accERC20PerShare).div(1e36);
+
+    uint256 pendingAmount = user.amount * pool.accERC20PerShare / 1e36 - user.rewardDebt;
+    if (pendingAmount > 0) {
+      erc20Transfer(msg.sender, pendingAmount);
+    }
+    
+    user.amount = user.amount - _amount;
+    user.rewardDebt = user.amount * pool.accERC20PerShare / 1e36;
     pool.lpToken.safeTransfer(address(msg.sender), _amount);
     emit Withdraw(msg.sender, _pid, _amount);
   }
@@ -295,7 +313,7 @@ contract Farming is Ownable, IFarming {
     address _to, 
     uint256 _amount
   ) internal {
-    erc20.transfer(_to, _amount);
+    SafeERC20.safeTransfer(erc20, _to, _amount);
     paidOut += _amount;
   }
 }
