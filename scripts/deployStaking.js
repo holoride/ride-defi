@@ -18,7 +18,7 @@ async function main() {
   let StakingToken = null;
 
   // If on Goerli, deploy both test staking and reward token
-  if (network.name === "goerli") {
+  if (network.name !== "mainnet") {
     const TokenFactory = await ethers.getContractFactory("GenericERC20");
 
     console.log("Deploy staking token...");

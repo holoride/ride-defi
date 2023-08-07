@@ -3,29 +3,31 @@ const { ethers, network, run } = require("hardhat");
 async function main() {
   // TODO: Update parameters before deploy
   const rewardsPerBlock = ethers.utils.parseEther("2"); //TODO: Update
-  const startingBlockNumber = 8738950; // Update
+  const startingBlockNumber = await ethers.provider.getBlockNumber() + 1000; // Update
   const shouldFundFarming = true;
   const fundingAmount = ethers.utils.parseEther("10000000")
+  const shouldCreatePool = true;
 
   let lpTokenAddress = "0x..."; // Address of the lp token
   let rewardTokenAddress = "0x..."; // Address of the token used for the reward
   let rewardToken = null;
+  let lpToken = null;
 
   // If on Goerli, deploy both test lp and reward token
-  if (network.name === "goerli") {
+  if (network.name !== "mainnet") {
     const TokenFactory = await ethers.getContractFactory("GenericERC20");
 
     console.log("Deploy LP token...");
-    const LPToken = await TokenFactory.deploy("LP Token", "LPT");
-    await LPToken.deployed();
-    console.log("LP token deployed at address:", LPToken.address);
+    lpToken = await TokenFactory.deploy("LP Token", "LPT");
+    await lpToken.deployed();
+    console.log("LP token deployed at address:", lpToken.address);
 
     console.log("Deploy reward token...");
     rewardToken = await TokenFactory.deploy("RewardToken", "RT");
     await rewardToken.deployed();
     console.log("Reward token deployed at address:", rewardToken.address);
 
-    lpTokenAddress = LPToken.address;
+    lpTokenAddress = lpToken.address;
     rewardTokenAddress = rewardToken.address;
   }
 
@@ -47,6 +49,19 @@ async function main() {
     tx = await Farming.fund(fundingAmount)
     await tx.wait()
     console.log("Farming funded.")
+
+    // If should create pool
+    if (shouldCreatePool) {
+      console.log("Approving transfer of 1 wei of LPs...")
+      let tx = await lpToken.approve(Farming.address, "1")
+      await tx.wait()
+      console.log("Amount approved.")
+
+      console.log("Creating farming pool")
+      tx = await Farming.add(1000, lpTokenAddress, true)
+      await tx.wait()
+      console.log("Pool created.")
+    }
   }
 
   // Verify on explorer

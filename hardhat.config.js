@@ -25,6 +25,10 @@ module.exports = {
     goerli: {
       url: process.env.GOERLI_RPC_PROVIDER,
       accounts: [process.env.GOERLI_PRIVATE_KEY]
+    },
+    sepolia: {
+      url: process.env.SEPOLIA_RPC_PROVIDER,
+      accounts: [process.env.SEPOLIA_PRIVATE_KEY]
     }
   },
 

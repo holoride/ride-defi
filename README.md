@@ -14,8 +14,10 @@ Last step is to configure the .env file. The format is
 ```
 ETHEREUM_PRIVATE_KEY=
 GOERLI_PRIVATE_KEY=
+SEPOLIA_PRIVATE_KEY=
 ETHEREUM_RPC_PROVIDER=
 GOERLI_RPC_PROVIDER=
+SEPOLIA_RPC_PROVIDER=
 ETHERSCAN_API_KEY=
 ```
 You will also find a .env.template file that you can rename and use instead of creating a new one from scratch.
@@ -26,14 +28,14 @@ Once done, you can just run
 ```
 $ npx hardhat run scripts/deployStaking.js --network <network name>
 ```
-If you are deploying on Goerli, it will automatically deploy two ERC20 tokens called RewardToken and StakingToken. The wallet that runs the deploy will also receive one million of both for testing.
-Latest deploeyed smart contracts can be found here:
+If you are deploying on Sepolia or Goerli, it will automatically deploy two ERC20 tokens called RewardToken and StakingToken. The wallet that runs the deploy will also receive one million of both for testing.
+Latest deploeyed smart contracts on Sepolia can be found here:
 ```
-Staking Smart Contract (short term): 0x8Fdc6E1377fda9a674959260403063D15539a96D
-Staking Smart Contract (mid term): 0x89e70B4aaBC1baeB66036935b84BA18908EA97De
-Staking Smart Contract (long term): 0x42C5C21bED31B43f398555FD661cC5713E4421E2
-Staking Token: 0x660Cbc499dA297D72FC7091b07A80cFa1c161024
-Reward Token: 0x8B8f0C230e40052B840D78aa6585Ae1F172cC214
+Staking Smart Contract (short term): 0x10186c1dE1720022E19cfab17564b012B72239dD
+Staking Smart Contract (mid term): 0xBb28edd29a6F53854515fA38E5cf4EAE4157C3F9
+Staking Smart Contract (long term): 0x0DA6896D4F9b448734FFf3BEA9a0A8c0B0DC59f9
+Staking Token: 0x67e946fc4Ab6c06857eab8daFACb7bEC4Fdf527a
+Reward Token: 0x0D1b572bE912ef877a974E404Bf84A85d15D8032
 ```
 
 ## Deploy Farming
@@ -42,12 +44,12 @@ Once done, you can just run
 ```
 $ npx hardhat run scripts/deployFarming.js --network <network name>
 ```
-If you are deploying on Goerli, it will automatically deploy two ERC20 tokens called RewardToken and LPToken. The wallet that runs the deploy will also receive one million of both for testing.
-Latest deploeyed smart contracts can be found here:
+If you are deploying on Sepolia or Goerli, it will automatically deploy two ERC20 tokens called RewardToken and LPToken. The wallet that runs the deploy will also receive one million of both for testing.
+Latest deploeyed smart contracts on Sepolia can be found here:
 ```
-Farming Smart Contract: 0x81b628bEBfcab17e9A15ad1548d58283E8B8B4b0
-LP Token: 0xf36dC610A2CF10cac0C6A35C2d21C72539D18Ffd
-Reward Token: 0x92cCB84A3D958335EFd602f0CDAF647d5429c6b9
+Farming Smart Contract: 0x483169E793ccA54e4fB0d5FdbD576172a1DD4598
+LP Token: 0x823446c1Fdc1b3a00E914B9D65331159746C5743
+Reward Token: 0xc6ac5F70C77174Ad10Cf53e6990A22d5f5043be6
 ```
 
 ## Test
