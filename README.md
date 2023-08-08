@@ -31,11 +31,11 @@ $ npx hardhat run scripts/deployStaking.js --network <network name>
 If you are deploying on Sepolia or Goerli, it will automatically deploy two ERC20 tokens called RewardToken and StakingToken. The wallet that runs the deploy will also receive one million of both for testing.
 Latest deploeyed smart contracts on Sepolia can be found here:
 ```
-Staking Smart Contract (short term): 0x10186c1dE1720022E19cfab17564b012B72239dD
-Staking Smart Contract (mid term): 0xBb28edd29a6F53854515fA38E5cf4EAE4157C3F9
-Staking Smart Contract (long term): 0x0DA6896D4F9b448734FFf3BEA9a0A8c0B0DC59f9
-Staking Token: 0x67e946fc4Ab6c06857eab8daFACb7bEC4Fdf527a
-Reward Token: 0x0D1b572bE912ef877a974E404Bf84A85d15D8032
+Staking Smart Contract (short term): 0xf36dC610A2CF10cac0C6A35C2d21C72539D18Ffd
+Staking Smart Contract (mid term): 0x92cCB84A3D958335EFd602f0CDAF647d5429c6b9
+Staking Smart Contract (long term): 0x81b628bEBfcab17e9A15ad1548d58283E8B8B4b0
+Staking Token: 0x788F50B9b5b3Ec615cadF30De486CB567c592D33
+Reward Token: 0x788F50B9b5b3Ec615cadF30De486CB567c592D33
 ```
 
 ## Deploy Farming

@@ -8,9 +8,9 @@ async function main() {
   const stakingTerm1 = 60 * 60 * 24; // staking term expressed in seconds
   const stakingTerm2 = 60 * 60 * 24 * 2; // staking term expressed in seconds
   const stakingTerm3 = 60 * 60 * 24 * 3; // staking term expressed in seconds
-  const fundAmount1 = ethers.utils.parseEther("1000000")
-  const fundAmount2 = ethers.utils.parseEther("1000000")
-  const fundAmount3 = ethers.utils.parseEther("1000000")
+  const fundAmount1 = ethers.utils.parseEther("10000")
+  const fundAmount2 = ethers.utils.parseEther("10000")
+  const fundAmount3 = ethers.utils.parseEther("10000")
   const shouldFund = true; // If true, funds the contract
   let tokenToStakeAddress = "0x..."; // Address of the token to stake 
   let rewardTokenAddress = "0x..."; // Address of the token used for the rewards
@@ -33,6 +33,10 @@ async function main() {
 
     tokenToStakeAddress = StakingToken.address;
     rewardTokenAddress = RewardToken.address;
+  } else {
+    const Erc20Factory = await ethers.getContractFactory("GenericERC20")
+    StakingToken = Erc20Factory.attach(tokenToStakeAddress)
+    RewardToken = Erc20Factory.attach(rewardTokenAddress)
   }
   
   // Deploy 
