@@ -38,6 +38,15 @@ Staking Token: 0x788F50B9b5b3Ec615cadF30De486CB567c592D33
 Reward Token: 0x788F50B9b5b3Ec615cadF30De486CB567c592D33
 ```
 
+Latest deployed smart contracts on Mainnet can be found here
+```
+Staking Smart Contract (short term): 0x440526b63561a6F3395a204BFe3a6544cb356B86
+Staking Smart Contract (mid term): 0x2Cb0F3b5648c794D2943Cf1570d034c91d25bf0E
+Staking Smart Contract (long term): 0x548cE6606d196a0aB460762A60636CBe40966944
+Staking Token: 0xf97e2A78f1f3D1fD438ff7cC3BB7De01E5945B83 (RIDE)
+Reward Token: 0xf97e2A78f1f3D1fD438ff7cC3BB7De01E5945B83 (RIDE)
+```
+
 ## Deploy Farming
 In order to deploy the farming smart contract you have to update the farming parameters in the script scripts/deployFarming.js. 
 Once done, you can just run

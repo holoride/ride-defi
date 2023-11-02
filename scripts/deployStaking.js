@@ -1,24 +1,26 @@
 const { ethers, network, run } = require("hardhat");
 
 async function main() {
+  const deployer = await ethers.getSigner()
+
   // TODO: Update parameters before deploy
-  const rewardsPercentage1 = 219; // 10'000 means 100% so 1'000 is 10%
-  const rewardsPercentage2 = 548; // 10'000 means 100% so 1'000 is 10%
-  const rewardsPercentage3 = 986; // 10'000 means 100% so 1'000 is 10%
-  const stakingTerm1 = 60 * 60 * 24; // staking term expressed in seconds
-  const stakingTerm2 = 60 * 60 * 24 * 2; // staking term expressed in seconds
-  const stakingTerm3 = 60 * 60 * 24 * 3; // staking term expressed in seconds
-  const fundAmount1 = ethers.utils.parseEther("10000")
-  const fundAmount2 = ethers.utils.parseEther("10000")
-  const fundAmount3 = ethers.utils.parseEther("10000")
+  const rewardsPercentage1 = 300; // 10'000 means 100% so 1'000 is 10%
+  const rewardsPercentage2 = 750; // 10'000 means 100% so 1'000 is 10%
+  const rewardsPercentage3 = 1800; // 10'000 means 100% so 1'000 is 10%
+  const stakingTerm1 = 60 * 60 * 24 * 90; // staking term expressed in seconds
+  const stakingTerm2 = 60 * 60 * 24 * 180; // staking term expressed in seconds
+  const stakingTerm3 = 60 * 60 * 24 * 365; // staking term expressed in seconds
+  const fundAmount1 = ethers.utils.parseEther("1000000")
+  const fundAmount2 = ethers.utils.parseEther("1000000")
+  const fundAmount3 = ethers.utils.parseEther("1000000")
   const shouldFund = true; // If true, funds the contract
-  let tokenToStakeAddress = "0x..."; // Address of the token to stake 
-  let rewardTokenAddress = "0x..."; // Address of the token used for the rewards
+  let tokenToStakeAddress = "0xf97e2A78f1f3D1fD438ff7cC3BB7De01E5945B83"; // Address of the token to stake 
+  let rewardTokenAddress = "0xf97e2A78f1f3D1fD438ff7cC3BB7De01E5945B83"; // Address of the token used for the rewards
   let RewardToken = null;
   let StakingToken = null;
 
   // If on Goerli, deploy both test staking and reward token
-  if (network.name !== "mainnet") {
+  if (network.name === "sepolia" || network.name === "goerli") {
     const TokenFactory = await ethers.getContractFactory("GenericERC20");
 
     console.log("Deploy staking token...");
@@ -38,6 +40,28 @@ async function main() {
     StakingToken = Erc20Factory.attach(tokenToStakeAddress)
     RewardToken = Erc20Factory.attach(rewardTokenAddress)
   }
+
+  console.log("Configuration:")
+  console.log("Deployer wallet:", deployer.address)
+  console.log("Staking Token:", await StakingToken.symbol(), StakingToken.address, tokenToStakeAddress)
+  console.log("Reward Token:", await RewardToken.symbol(), RewardToken.address, rewardTokenAddress)
+  console.log("Term 1:", stakingTerm1 / 86400, "days")
+  console.log("Term 2:", stakingTerm2 / 86400, "days")
+  console.log("Term 3:", stakingTerm3 / 86400, "days")
+  console.log("Amount 1:", ethers.utils.formatEther(fundAmount1))
+  console.log("Amount 2:", ethers.utils.formatEther(fundAmount2))
+  console.log("Amount 3:", ethers.utils.formatEther(fundAmount3))
+  console.log("Return 1:", rewardsPercentage1 / 10000 * 100, "%")
+  console.log("Return 2:", rewardsPercentage2 / 10000 * 100, "%")
+  console.log("Return 3:", rewardsPercentage3 / 10000 * 100, "%")
+  console.log("APR 1:", rewardsPercentage1 / 10000 * 100 * 4, "%")
+  console.log("APR 2:", rewardsPercentage2 / 10000 * 100 * 2, "%")
+  console.log("APR 3:", rewardsPercentage3 / 10000 * 100 * 1, "%")
+  console.log("Should fund?", shouldFund ? "YES" : "NO")
+  
+  console.log("Waiting 10 seconds...")
+  await new Promise(resolve => setTimeout(resolve, 10000));
+  console.log("Starting deploy...")
   
   // Deploy 
   console.log("Deploying Staking smart contract (short term) ...");
