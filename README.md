@@ -61,6 +61,13 @@ LP Token: 0x823446c1Fdc1b3a00E914B9D65331159746C5743
 Reward Token: 0xc6ac5F70C77174Ad10Cf53e6990A22d5f5043be6
 ```
 
+Latest deployed smart contracts on Mainnet can be found here
+```
+Farming Smart Contract: 0xc5C54da87A56e4310C7efB4dfF4E411fb63f8EE7
+LP Token: 0x49492de97028992a2d1f056A62ae98840Aa85306
+Reward Token: 0xf97e2A78f1f3D1fD438ff7cC3BB7De01E5945B83
+```
+
 ## Test
 In order to run tests you just have to run
 ```

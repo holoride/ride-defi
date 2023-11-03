@@ -1,20 +1,22 @@
 const { ethers, network, run } = require("hardhat");
 
 async function main() {
+  const deployer = await ethers.getSigner()
+
   // TODO: Update parameters before deploy
-  const rewardsPerBlock = ethers.utils.parseEther("2"); //TODO: Update
-  const startingBlockNumber = await ethers.provider.getBlockNumber() + 1000; // Update
+  const rewardsPerBlock = ethers.utils.parseEther("9"); //TODO: Update
+  const startingBlockNumber = await ethers.provider.getBlockNumber() + (60 * 60 * 3) / 12; // 12 hours after deployment
   const shouldFundFarming = true;
-  const fundingAmount = ethers.utils.parseEther("10000000")
+  const fundingAmount = ethers.utils.parseEther("11499993")
   const shouldCreatePool = true;
 
-  let lpTokenAddress = "0x..."; // Address of the lp token
-  let rewardTokenAddress = "0x..."; // Address of the token used for the reward
+  let lpTokenAddress = "0x49492de97028992a2d1f056A62ae98840Aa85306"; // Address of the lp token
+  let rewardTokenAddress = "0xf97e2A78f1f3D1fD438ff7cC3BB7De01E5945B83"; // Address of the token used for the reward
   let rewardToken = null;
   let lpToken = null;
 
   // If on Goerli, deploy both test lp and reward token
-  if (network.name !== "mainnet") {
+  if (network.name === "sepolia" || network.name === "goerli") {
     const TokenFactory = await ethers.getContractFactory("GenericERC20");
 
     console.log("Deploy LP token...");
@@ -29,7 +31,26 @@ async function main() {
 
     lpTokenAddress = lpToken.address;
     rewardTokenAddress = rewardToken.address;
+  } else {
+    const Erc20Factory = await ethers.getContractFactory("GenericERC20")
+    rewardToken = Erc20Factory.attach(rewardTokenAddress)
+    lpToken = Erc20Factory.attach(lpTokenAddress)
   }
+
+  console.log("Configuration:")
+  console.log("Deployer wallet:", deployer.address)
+  console.log("LP Token address:", lpToken.address, lpTokenAddress, await lpToken.symbol())
+  console.log("Reward Token address:", rewardToken.address, rewardTokenAddress, await rewardToken.symbol())
+  console.log("Reward per block:", ethers.utils.formatEther(rewardsPerBlock))
+  console.log("Starting block:", startingBlockNumber)
+  console.log("Funding amount:", ethers.utils.formatEther(fundingAmount))
+  console.log("Expected duration:", (fundingAmount.div(rewardsPerBlock).mul(12).toNumber()) / 86400, "days" )
+  console.log("Should fund the contract?", shouldFundFarming ? "YES" : "NO")
+  console.log("Should create farming pool?", shouldCreatePool ? "YES" : "NO")
+
+  console.log("Waiting 10 seconds...")
+  await new Promise(resolve => setTimeout(resolve, 10000));
+  console.log("Starting deploy...")
 
   // Deploy 
   console.log("Deploying Farming smart contract...");
