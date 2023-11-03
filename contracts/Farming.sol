@@ -35,7 +35,8 @@ contract Farming is Ownable, IFarming {
   }
 
   // Minimum number of blocks that needs to pass, from the deploy, in order to start distributing rewards
-  uint constant MINIMUM_BLOCKS_BEFORE_DISTRIBUTION = 216_000; // 30 days divided by 12 seconds (average Ethereum block time)
+  // uint constant MINIMUM_BLOCKS_BEFORE_DISTRIBUTION = 216_000; // 30 days divided by 12 seconds (average Ethereum block time)
+  uint constant MINIMUM_BLOCKS_BEFORE_DISTRIBUTION = 0; // Removed due to time constraints
 
   // Maximum number of blocks that needs to pass, from the deploy, in order to start distributing rewards
   uint constant MAXIMUM_BLOCKS_BEFORE_DISTRIBUTION = 1_296_000; // 180 days divided by 12 seconds (average Ethereum block time)
